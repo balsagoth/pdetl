@@ -1,6 +1,7 @@
 import os
 import imp
 import sqlalchemy
+from sqlalchemy.orm import sessionmaker
 import pandas as pd
 
 SOURCE_TYPES = ('source', 'target', 'staging')
@@ -171,3 +172,18 @@ class SqlStore(Store):
     def transform(self, func, *args, **kwargs):
         return func(self, *args, **kwargs)
 
+    def update(self, values=None, wherecolumn=None):
+        metadata = sqlalchemy.MetaData(bind=self._engine)
+        datatable = sqlalchemy.Table(self.table, metadata, autoload=True)
+
+        if len(wherecolumn) == 1:
+            update = sqlalchemy.sql.update(datatable)\
+                .values(values)\
+                .where(datatable.get_children(column_collections=True)[0] == wherecolumn)
+        else:
+            #TODO: develop whereclause for cases with more than 1 clause
+            update = sqlalchemy.sql.update(datatable)\
+                .values(values)\
+                .where(sqlalchemy.and_(datatable.c.wherecolumn == wherecolumn))
+
+        return self._engine.execute(update)
