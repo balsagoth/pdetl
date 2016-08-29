@@ -1,7 +1,6 @@
 import os
 import imp
 import sqlalchemy
-from sqlalchemy.orm import sessionmaker
 import pandas as pd
 
 SOURCE_TYPES = ('source', 'target', 'staging')
@@ -175,7 +174,6 @@ class SqlStore(Store):
     def update(self, values=None, wherecolumn=None):
         metadata = sqlalchemy.MetaData(bind=self._engine)
         datatable = sqlalchemy.Table(self.table, metadata, autoload=True)
-
         if len(wherecolumn) == 1:
             update = sqlalchemy.sql.update(datatable)\
                 .values(values)\
@@ -185,5 +183,4 @@ class SqlStore(Store):
             update = sqlalchemy.sql.update(datatable)\
                 .values(values)\
                 .where(sqlalchemy.and_(datatable.c.wherecolumn == wherecolumn))
-
         return self._engine.execute(update)
