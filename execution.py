@@ -122,3 +122,9 @@ class Pipeline(object):
         if save:
             self.data = data
         return data
+
+    def update(self, store, *args, **kwargs):
+        """Updates the target table with passed values
+        """
+        source = self.datastore.get(store)
+        return source.update(*args, **kwargs)
